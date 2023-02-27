@@ -1,0 +1,46 @@
+name: Build static binary
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: "ubuntu-20.04"
+    
+    strategy:
+      matrix:
+        php-version:
+          - "8.2"
+
+    steps:
+    - name: "Checkout code"
+      uses: "actions/checkout@v2"
+
+    - name: "Install PHP"
+      uses: "shivammathur/setup-php@v2"
+      with:
+        coverage: "none"
+        php-version: "${{ matrix.php-version }}"
+
+    - name: "Install dependencies with Composer"
+      uses: "ramsey/composer-install@v1"
+      with:
+        dependency-versions: "highest"
+
+    - name: Install Box
+      run: |
+        wget \
+          "https://github.com/box-project/box/releases/latest/download/box.phar" \
+          --quiet \
+          -O ./box
+        chmod +x ./box
+        sudo mv ./box /usr/local/bin  
+
+    - name: Run Box
+      run: box compile
+
+    - name: Prepend the PHAR with micro.sfx
+      run: |
+        cat micro-cli.sfx static.phar > static
+        chmod +x static
