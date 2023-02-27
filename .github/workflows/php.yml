@@ -41,6 +41,10 @@ jobs:
       run: box compile
 
     - name: Prepend the PHAR with micro.sfx
-      run: |
-        cat micro-cli.sfx static.phar > static
-        chmod +x static
+      run: cat micro-cli.sfx static.phar > static && chmod +x static
+
+    - name: Store binary as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: static-binary
+        path: static
